@@ -1,0 +1,42 @@
+#!/bin/bash
+
+logfile=/var/tmp/icee.log
+
+function init {
+  if [ ! -f $logfile ]; then
+    echo "Creating log file $logfile"
+    touch $logfile
+  fi
+}
+
+function usage {
+  echo "usage"
+}
+
+function do_run {
+  init
+  eval "$*" | tee $logfile
+}
+
+function do_tail {
+  if [ $# = 1 ]; then
+    init
+    echo "tailing $logfile with filter \"$1\""
+    tail -n0 -f "$logfile" | egrep "$1"
+    echo "done"
+  else
+    usage
+  fi
+}
+
+if [ $# = 0 ]; then
+  usage
+else
+  if [ $1 = "run" ]; then
+    do_run "${@:2}"
+  elif [ $1 = "tail" ]; then
+    do_tail "${@:2}"
+  else
+    usage
+  fi
+fi
